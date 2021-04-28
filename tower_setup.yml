@@ -1,0 +1,61 @@
+---
+- name: configures tower node
+  hosts: localhost
+  become: true
+  vars:
+
+    admin_password: ansible123!
+    use_manifest: false
+
+  tasks:
+
+    - name: add choco workshop project
+      awx.awx.tower_project:
+        name: "Chocolatey Workshop"
+        organization: "Default"
+        scm_type: git
+        scm_url: "https://github.com/gejames/chocowebinar.git"
+        state: present
+        tower_username: admin
+        tower_password: "{{ admin_password }}"
+        tower_host: "{{ ansible_host }}"
+        tower_verify_ssl: false 
+
+    - name: add windows inventory
+      awx.awx.tower_inventory:
+        name: "Windows Inventory"
+        organization: "Default"
+        state: present
+        tower_username: admin
+        variables:
+          ansible_user: admin 
+          ansible_password: Password123  
+          ansible_connection: winrm
+          ansible_winrm_server_cert_validation: ignore
+        tower_password: "{{ admin_password }}"
+        tower_host: "{{ ansible_host }}"
+        tower_verify_ssl: false
+
+    - name: create winhost in Windows Inventory
+      awx.awx.tower_host:
+        name: "winhost"
+        description: "Windows Server"
+        inventory: "Windows Inventory"
+        state: present
+        tower_username: admin
+        tower_password: "{{ admin_password }}"
+        tower_host: "{{ ansible_host }}"
+        tower_verify_ssl: false
+
+    - name: create nios inventory group in tower
+      awx.awx.tower_group:
+        name: "nios_grid"
+        description: "NIOS Inventory Group"
+        hosts:
+          - winhost
+        inventory: "Windows Inventory"
+        state: present
+        tower_username: admin
+        tower_password: "{{ admin_password }}"
+        tower_host: "{{ ansible_host }}"
+        tower_verify_ssl: false
