@@ -59,3 +59,17 @@
         tower_password: "{{ admin_password }}"
         tower_host: "{{ ansible_host }}"
         tower_verify_ssl: false
+
+    - name: create machine cred for winhost
+      awx.awx.tower_credential:
+        name: "windows creds"
+        description: "Machine creds for windows. Needed for AdHoc commands"
+        organization: Default
+        credential_type: "Machine"
+        inputs:
+          username: "admin"
+          password: "Password123"
+        tower_username: admin
+        tower_password: "{{ admin_password }}"
+        tower_host: "{{ ansible_host }}"
+        validate_certs: false
