@@ -2,13 +2,12 @@
 - name: configures tower node
   hosts: localhost
   become: true
-  vars:
 
+  vars:
     admin_password: ansible123!
     use_manifest: false
 
   tasks:
-
     - name: add choco workshop project
       awx.awx.tower_project:
         name: "Chocolatey Workshop"
@@ -20,6 +19,10 @@
         tower_password: "{{ admin_password }}"
         tower_host: "{{ ansible_host }}"
         tower_verify_ssl: false 
+        register: project_status
+        until: project_status is success
+        delay: 3
+        retries: 60
 
     - name: add windows inventory
       awx.awx.tower_inventory:
